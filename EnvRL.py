@@ -2,6 +2,7 @@ import numpy as np
 import gym
 from gym.spaces import Discrete, MultiDiscrete
 from Action import Actions
+from attack import dp, ddos, cw_cpa
 
 
 class EnvRL_v0(gym.Env):
@@ -18,6 +19,9 @@ class EnvRL_v0(gym.Env):
         # attack happen
 
         if action == Actions.Defence1:
+            # at time T, run the defence for dp and update two accuracies
+            # self.previous_accuracy = self.current_accuracy # save the accuracy at time T-1
+            # self.current_accuracy = 0  # get the accuracy from cnn at time T
             pass
         elif action == Actions.Defence2:
             pass
