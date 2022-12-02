@@ -1,5 +1,6 @@
 from EnvRL import EnvRL_v0
 from stable_baselines3 import DQN
+import random
 
 env = EnvRL_v0()
 env.reset()
@@ -16,7 +17,14 @@ episodes = 10000
 obs = env.reset()
 for ep in range(episodes):
     action, _state = model.predict(obs, deterministic=True)
-    obs, reward, done, info = env.step(action)
-    env.render()
-    if done:
-      obs = env.reset()
+
+    nids_success_rate = random.randrange(0, 100)
+    if nids_success_rate < 80:
+        env.take_action(action)
+        obs, reward, done, info = env.step(action)
+        env.render()
+        if done:
+            obs = env.reset()
+    else:
+        continue
+

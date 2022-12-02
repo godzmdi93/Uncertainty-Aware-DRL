@@ -19,7 +19,11 @@ class EnvRL_v0(gym.Env):
         self.action_space = Discrete(4)
         self.observation_space = MultiDiscrete([self.previous_accuracy, self.current_accuracy])
 
+
+
+
     def take_action(self, action):
+        nids_success_rate = 2
         # attack happen
 
         if action == Actions.Defence1:
