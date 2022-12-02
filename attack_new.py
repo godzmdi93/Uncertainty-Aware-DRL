@@ -47,6 +47,16 @@ def ddos(X_train,y_train,sa):
     
     return X_train,y_train
 
+
+def add_noise(X_train, y_train, rel):
+    print('noise added by broken sensor')
+    impact = random.sample(range(0, 59999), int((1-rel) * 60000))
+    for i in impact:
+        X_train[i] = np.random.randint(sys.maxsize, size=(28, 28))
+    y_train = [i if (i != 1 and random.random() > (1-rel)) else random.randint(0, 9) for i in y_train]
+
+    return X_train, y_train
+
 #sa is coverage rate for attackers, sd is converage rate for defender
 def attack_model(sa,sd,df_set):
 
@@ -55,6 +65,8 @@ def attack_model(sa,sd,df_set):
 
     #load datasets
     (xtrain,ytrain),(xtest,ytest)=mnist.load_data()
+
+    yxtrain, ytrain = add_noise(xtrain, ytrain, 0.90)
 
     #random a set of attacks
     #0 = {phish, dp,mp}, 1 = {phish, dp,ddos}, 2 = {phish,mp,ddos}, 3 = {dp, mp, ddos}
