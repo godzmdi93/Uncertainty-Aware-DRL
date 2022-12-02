@@ -53,6 +53,7 @@ def attack3(X_train, sa, sd, type):
     return cnn_accuracy
 
 def attack4(X_train, sa, sd, type):
+    print("type", type)
     if type == Actions.Defence4:
         if sa==0.8 and sd==0.2:
             cnn_accuracy = 0.8
