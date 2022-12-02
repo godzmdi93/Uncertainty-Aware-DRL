@@ -2,16 +2,20 @@ import numpy as np
 import gym
 from gym.spaces import Discrete, MultiDiscrete
 from Action import Actions
-from attack import dp, ddos, cw_cpa
-
+from attack1 import dp, ddos, attack3, attack4
+import pickle
+X_train = pickle.load(open("xtrain", "rb"))
+y_train = pickle.load(open("ytrain", "rb"))
+X_test = pickle.load(open("xtest", "rb"))
+y_test = pickle.load(open("ytest", "rb"))
 
 class EnvRL_v0(gym.Env):
 
     def __init__(self):
         super().__init__()
 
-        self.current_accuracy = 0
-        self.previous_accuracy = 0
+        self.current_accuracy = 1
+        self.previous_accuracy = 1
         self.action_space = Discrete(4)
         self.observation_space = MultiDiscrete([self.previous_accuracy, self.current_accuracy])
 
@@ -19,16 +23,23 @@ class EnvRL_v0(gym.Env):
         # attack happen
 
         if action == Actions.Defence1:
+            # dp
+            # dp(X_train,sa,sd,Defence1)
+            self.previous_accuracy = self.current_accuracy
+            self.current_accuracy = dp(X_train, 0.8, 0.2, Actions.Defence1)
+
             # at time T, run the defence for dp and update two accuracies
             # self.previous_accuracy = self.current_accuracy # save the accuracy at time T-1
             # self.current_accuracy = 0  # get the accuracy from cnn at time T
-            pass
         elif action == Actions.Defence2:
-            pass
+            self.previous_accuracy = self.current_accuracy
+            self.current_accuracy = ddos(X_train, 0.8, 0.2, Actions.Defence2)
         elif action == Actions.Defence3:
-            pass
+            self.previous_accuracy = self.current_accuracy
+            self.current_accuracy = attack3(X_train, 0.8, 0.2, Actions.Defence3)
         elif action == Actions.Defence4:
-            pass
+            self.previous_accuracy = self.current_accuracy
+            self.current_accuracy = attack4(X_train, 0.8, 0.2, Actions.Defence4)
 
     def step(self, action):
 
