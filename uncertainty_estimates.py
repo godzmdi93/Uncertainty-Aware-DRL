@@ -31,3 +31,17 @@ def shannon(action_sequence):
 def Bal(b_i, b_j):
     output = 1 - np.abs(b_i - b_j) / (b_i + b_j)
     return output
+
+def Diss(b_list):
+    b_diss = 0
+
+    for i in b_list:
+        up = 0
+        down = 0
+        for j in b_list:
+            if i != j:
+                up+=j * Bal(i,j)
+                down+=j
+        b_diss+=i*up/down
+
+    return b_diss
