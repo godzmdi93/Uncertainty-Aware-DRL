@@ -3,38 +3,6 @@ from qlearning import *
 from EnvRL import EnvRL_v0
 import matplotlib.pyplot as plt
 
-def plot(dis):
-    # set width of bar
-    barWidth = 0.2
-    fig = plt.subplots(figsize =(12, 8))
-
-    # set height of bar
-    s0 = dis[0]
-    s1 = dis[1]
-    s2 = dis[2]
-    s3 = dis[3]
-
-    # Set position of bar on X axis
-    br1 = np.arange(len(s0))
-    br2 = [x + barWidth for x in br1]
-    br3 = [x + barWidth for x in br2]
-    br4 = [x + barWidth for x in br3]
-
-
-    plt.bar(br1, s0, color ='r', width = barWidth,edgecolor ='grey', label ='Action1')
-    plt.bar(br2, s1, color ='g', width = barWidth,edgecolor ='grey', label ='Action2')
-    plt.bar(br3, s2, color ='b', width = barWidth,edgecolor ='grey', label ='ACtion3')
-    plt.bar(br4, s3, color ='y', width = barWidth,edgecolor ='grey', label ='Action4')
-
-    # Adding Xticks
-    plt.xlabel('States', fontweight ='bold', fontsize = 15)
-    plt.ylabel('Probability', fontweight ='bold', fontsize = 15)
-    plt.xticks([r + barWidth for r in range(len(s0))],['Attack1', 'Attack2', 'Attack3', 'Attack4'])
-
-    plt.legend()
-    plt.show()
-
-
 def evaluate_QL(step, nids):
     print('Evalution for Q Learning:')
     total_reward = 0
@@ -43,9 +11,10 @@ def evaluate_QL(step, nids):
     attack_set = [random.randint(0,3) for i in range(step)]
     env  = EnvRL_v0(attack_set)
 
-    q_table,record,pdf = train(step,nids)
+    q_table,record,pdf,_,_ = train(step,nids)
 
     actions = []
+    attacks = []
 
     for _ in range(episodes):
 
@@ -55,9 +24,11 @@ def evaluate_QL(step, nids):
         done = False
 
         action_list = []
+        attack_list = []
         
         while not done:
             nids_success_rate = random.randrange(0, 100)
+            attack_list.append(env.attack_set[env.current_attack])
             if nids_success_rate < nids:
                 action = np.argmax(q_table[state])
                 state, reward, done, info = env.step(action)
@@ -71,12 +42,13 @@ def evaluate_QL(step, nids):
 
             epochs += 1
         actions.append(action_list)
+        attacks.append(attack_list)
         total_reward+=reward
 
     print(f"Results after {episodes} episodes:")
     print(f"Average reward per episode: {total_reward / episodes}")
 
-    return q_table,record,actions,pdf
+    return q_table,record,actions,attacks
 
 def evaluate_random():
 
@@ -84,8 +56,11 @@ def evaluate_random():
     total_reward = 0
     episodes = 100
 
-    attack_set = [randint(0,3) for i in range(50)]
+    attack_set = [randint(0,3) for i in range(500)]
     env  = EnvRL_v0(attack_set)
+
+    actions = []
+    attacks = []
 
     for _ in range(episodes):
 
@@ -93,40 +68,56 @@ def evaluate_random():
         epochs, reward = 0, 0
         
         done = False
+
+        action_list = []
+        attack_list = []
         
         while not done:
             nids_success_rate = random.randrange(0, 100)
+            attack_list.append(env.attack_set[env.current_attack])
             if nids_success_rate < 80:
                 action = randint(0,3)
+                action_list.append(action)
                 state, reward, done, info = env.step(action)
                 state = env.attack_set[state]
             epochs += 1
 
+        actions.append(action_list)
+        attacks.append(attack_list)
         total_reward+=reward
 
     print(f"Results after {episodes} episodes:")
     print(f"Average reward per episode: {total_reward / episodes}")
 
+    return actions,attacks
 
-q_table,rewards,actions,pdf = evaluate_QL(500,50) #500 is number of steps in one eps, 80 is the nids success rate
+
+q_table,rewards,actions,attacks = evaluate_QL(500,80) #500 is number of steps in one eps, 80 is the nids success rate
 evaluate_random()
 
-#this will give you an action sequence, [0,1,2,3,2,1,...]; 
-# if -1 appears, it means we don't take any action since nids failed
-#print('Actions for eps 1:')
-#print(actions[0])
 
-print('Q table:')
-print(q_table)
+#Accuracy
+# count = 0
+# total = 0
 
-print('Plot action distributions for each state')
-plot(q_table)
+# for i,j in zip(actions,attacks):
+#     for x in range(len(i)):
+#         if i[x]==j[x]:
+#             count+=1
+#         if i[x]!=-1:
+#             total+=1
+# print('total: ',total)
+# print('same: ', count)
+# print('accuracy: ',count/total)
 
-print('Comparison between Q-Learning and Random algorithm')
-x = [i for i in range(len(rewards[0]))]
-plt.plot(x,rewards[0])
-plt.xlabel('Number of steps')
-plt.ylabel('Accumulated Rewards')
+# print('Q table:')
+# print(q_table)
+
+x = [i for i in range(len(rewards))]
+plt.plot(x,rewards)
+plt.xlabel('Number of episodes')
+plt.ylabel('Average reward per episode')
+plt.title('Epsilon-Greedy')
 plt.show()
 
 
