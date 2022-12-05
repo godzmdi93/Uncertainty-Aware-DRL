@@ -1,3 +1,4 @@
+from cProfile import label
 from re import U
 from termios import B50
 from qlearning import *
@@ -9,61 +10,199 @@ from uncertainty_estimates import *
 import matplotlib.pyplot as plt
 
 
-_,_,pdf = train(500,50)
+_,_,pdf,acts,attacks = train(5000,20) #500,80
 
 
 #calculate B U for observation 1 (which is attack set 1)
 B1,B2,B3,B4 = [],[],[],[] #belief mass for each action
-U1 = [] 
-for i in pdf[0]:
-    for j in range(len(i)):
-        if j == 0:
-            r = i[j]
-            b_1 = translateB(r,i[0:4])
-            B1.append(b_1)
-        if j == 1:
-            r = i[j]
-            b_2 = translateB(r,i[0:4])
-            B2.append(b_2)
-        if j == 2:
-            r = i[j]
-            b_3 = translateB(r,i[0:4])
-            B3.append(b_3)
-        if j == 3:
-            r = i[j]
-            b_4 = translateB(r,i[0:4])
-            B4.append(b_4)
-    u = translateU(i[0:4])
-    U1.append(u)
+U1 = []
 
-R1 = []
-for i in range(len(B1)):
-    R1.append(translateR(B1[i],U1[i]))
+d = acts[0]
+a = attacks[0]
 
-#B U R
-# x = [i for i in range(len(U1))]
-# #plt.plot(x,B1)
-# plt.plot(x,U1)
-# #plt.plot(x,R1)
+def draw_u(action):
 
-#DPDF
-# # x = [1,2,3,4]
-# # y = np.random.uniform(0, 1, size=4)
-# #plt.plot(x, [U1[0]+y[0]*B1[0],U1[0]+y[0]*B2[0],U1[0]+y[0]*B3[0],U1[0]+y[0]*B4[0]])
+    count1 = 0
+    count2 = 0
+    count3 = 0
+    count4 = 0
+    count5 = 0
+    t = 0
+    f = []
+    for i in range(len(a)):
+        if a[i] == action:
+            t+=1
+            if d[i] == 0:
+                count1+=1
+            if d[i] == 1:
+                count2+=1
+            if d[i] == 2:
+                count3+=1
+            if d[i] == 3:
+                count4+=1
+            if d[i] == -1:
+                count5+=1
+            f.append([count1,count2,count3,count4,count5])
+    return f
+    
+B1 = draw_u(0) #belief for attack_set1
+B2 = draw_u(1)
+B3 = draw_u(2)
+B4 = draw_u(3)
 
-# plt.show()
-
-#Shannon entropy
-H = []
-for i in pdf[0]:
-    freqList = [i[0]/sum(i),i[1]/sum(i),i[2]/sum(i),i[3]/sum(i)]
-    H.append(shannon([],freqList))
-
-x = [i for i in range(len(H))]
-plt.plot(x,H)
-plt.show()
+#B, U
+def b_u(B1,B2,B3,B4):
+    x = [i for i in range(len(B1))]
+    plt.plot(x,[translateB(i[0],i[0:4]) for i in B1],label = 'Action1')
+    plt.plot(x,[translateB(i[1],i[0:4]) for i in B1],label = 'Action2')
+    plt.plot(x,[translateB(i[2],i[0:4]) for i in B1],label = 'Action3')
+    plt.plot(x,[translateB(i[3],i[0:4])for i in B1],label = 'Action4')
+    plt.plot(x,[translateU(i[0:4]) for i in B1],label = 'Uncertainty')
+    plt.xlabel('Number of steps')
+    plt.ylabel('Belief mass b_X1(x)')
+    plt.legend()
+    plt.show()
 
 #Dissonance
+def diss(B1,B2,B3,B4):
+    b1 = [translateB(i[0],i[0:4]) for i in B1]
+    b2 = [translateB(i[1],i[0:4]) for i in B1]
+    b3 = [translateB(i[2],i[0:4]) for i in B1]
+    b4 = [translateB(i[3],i[0:4]) for i in B1]
+
+
+    D1,D2,D3,D4 = [],[],[],[]
+    for i in range(len(b1)):
+        D1.append(Diss([b1[i],b2[i],b3[i],b4[i]]))
+    b1 = [translateB(i[0],i[0:4]) for i in B2]
+    b2 = [translateB(i[1],i[0:4]) for i in B2]
+    b3 = [translateB(i[2],i[0:4]) for i in B2]
+    b4 = [translateB(i[3],i[0:4]) for i in B2]
+    for i in range(len(b1)):
+        D2.append(Diss([b1[i],b2[i],b3[i],b4[i]]))
+
+    b1 = [translateB(i[0],i[0:4]) for i in B3]
+    b2 = [translateB(i[1],i[0:4]) for i in B3]
+    b3 = [translateB(i[2],i[0:4]) for i in B3]
+    b4 = [translateB(i[3],i[0:4]) for i in B3]
+    for i in range(len(b1)):
+        D3.append(Diss([b1[i],b2[i],b3[i],b4[i]]))
+
+    b1 = [translateB(i[0],i[0:4]) for i in B4]
+    b2 = [translateB(i[1],i[0:4]) for i in B4]
+    b3 = [translateB(i[2],i[0:4]) for i in B4]
+    b4 = [translateB(i[3],i[0:4]) for i in B4]
+    for i in range(len(b1)):
+        D4.append(Diss([b1[i],b2[i],b3[i],b4[i]]))
+
+
+    plt.xlabel('Number of steps')
+    plt.ylabel('Dissonance')
+    plt.plot([i for i in range(len(D1))],D1,label = 'attack_set1')
+    plt.plot([i for i in range(len(D2))],D2,label = 'attack_set2')
+    plt.plot([i for i in range(len(D3))],D3,label = 'attack_set3')
+    plt.plot([i for i in range(len(D4))],D4,label = 'attack_set4')
+    plt.legend()
+    plt.show()
+
+
+def entropy(B1,B2,B3,B4):
+    #attack_set1
+    b1 = [translateB(i[0],i[0:4]) for i in B1]
+    b2 = [translateB(i[1],i[0:4]) for i in B1]
+    b3 = [translateB(i[2],i[0:4]) for i in B1]
+    b4 = [translateB(i[3],i[0:4]) for i in B1]
+    u = [translateU(i[0:4]) for i in B1]
+
+    p1,p2,p3,p4 =[],[],[],[]
+    for i in range(len(b1)):
+        p1.append(b1[i]+0.25*u[i])
+    for i in range(len(b2)):
+        p2.append(b2[i]+0.25*u[i])
+    for i in range(len(b3)):
+        p3.append(b3[i]+0.25*u[i])
+    for i in range(len(b4)):
+        p4.append(b4[i]+0.25*u[i])
+
+    H1,H2,H3,H4 = [],[],[],[]
+    for i in range(len(p1)):
+        H1.append(p1[i]*math.log(p1[i],4)+p2[i]*math.log(p2[i],4)+p3[i]*math.log(p3[i],4)+p4[i]*math.log(p4[i],4))
+
+
+     #attack_set2
+    b1 = [translateB(i[0],i[0:4]) for i in B2]
+    b2 = [translateB(i[1],i[0:4]) for i in B2]
+    b3 = [translateB(i[2],i[0:4]) for i in B2]
+    b4 = [translateB(i[3],i[0:4]) for i in B2]
+    u = [translateU(i[0:4]) for i in B2]
+
+    p1,p2,p3,p4 =[],[],[],[]
+    for i in range(len(b1)):
+        p1.append(b1[i]+0.25*u[i])
+    for i in range(len(b2)):
+        p2.append(b2[i]+0.25*u[i])
+    for i in range(len(b3)):
+        p3.append(b3[i]+0.25*u[i])
+    for i in range(len(b4)):
+        p4.append(b4[i]+0.25*u[i])
+
+    for i in range(len(p1)):
+        H2.append(p1[i]*math.log(p1[i],4)+p2[i]*math.log(p2[i],4)+p3[i]*math.log(p3[i],4)+p4[i]*math.log(p4[i],4))
+
+      #attack_set3
+    b1 = [translateB(i[0],i[0:4]) for i in B3]
+    b2 = [translateB(i[1],i[0:4]) for i in B3]
+    b3 = [translateB(i[2],i[0:4]) for i in B3]
+    b4 = [translateB(i[3],i[0:4]) for i in B3]
+    u = [translateU(i[0:4]) for i in B3]
+
+    p1,p2,p3,p4 =[],[],[],[]
+    for i in range(len(b1)):
+        p1.append(b1[i]+0.25*u[i])
+    for i in range(len(b2)):
+        p2.append(b2[i]+0.25*u[i])
+    for i in range(len(b3)):
+        p3.append(b3[i]+0.25*u[i])
+    for i in range(len(b4)):
+        p4.append(b4[i]+0.25*u[i])
+
+    for i in range(len(p1)):
+        H3.append(p1[i]*math.log(p1[i],4)+p2[i]*math.log(p2[i],4)+p3[i]*math.log(p3[i],4)+p4[i]*math.log(p4[i],4))
+
+      #attack_set4
+    b1 = [translateB(i[0],i[0:4]) for i in B4]
+    b2 = [translateB(i[1],i[0:4]) for i in B4]
+    b3 = [translateB(i[2],i[0:4]) for i in B4]
+    b4 = [translateB(i[3],i[0:4]) for i in B4]
+    u = [translateU(i[0:4]) for i in B4]
+
+    p1,p2,p3,p4 =[],[],[],[]
+    for i in range(len(b1)):
+        p1.append(b1[i]+0.25*u[i])
+    for i in range(len(b2)):
+        p2.append(b2[i]+0.25*u[i])
+    for i in range(len(b3)):
+        p3.append(b3[i]+0.25*u[i])
+    for i in range(len(b4)):
+        p4.append(b4[i]+0.25*u[i])
+
+    for i in range(len(p1)):
+        H4.append(p1[i]*math.log(p1[i],4)+p2[i]*math.log(p2[i],4)+p3[i]*math.log(p3[i],4)+p4[i]*math.log(p4[i],4))
+
+    plt.plot([i for i in range(len(H1))],H1,label = 'attack_set1')
+    plt.plot([i for i in range(len(H2))],H2,label = 'attack_set2')
+    plt.plot([i for i in range(len(H3))],H3,label = 'attack_set3')
+    plt.plot([i for i in range(len(H4))],H4,label = 'attack_set4')
+    plt.xlabel('Number of steps')
+    plt.ylabel('Shannon Entropy H(X)')
+    plt.legend()
+    plt.show()
+
+
+b_u(B1,B2,B3,B4)
+#diss(B1,B2,B3,B4)
+#entropy(B1,B2,B3,B4)
+
 
 
 
