@@ -43,7 +43,7 @@ def evaluate_QL(step, nids):
     attack_set = [random.randint(0,3) for i in range(step)]
     env  = EnvRL_v0(attack_set)
 
-    q_table,record = train(step,nids)
+    q_table,record,pdf = train(step,nids)
 
     actions = []
 
@@ -76,7 +76,7 @@ def evaluate_QL(step, nids):
     print(f"Results after {episodes} episodes:")
     print(f"Average reward per episode: {total_reward / episodes}")
 
-    return q_table,record,actions
+    return q_table,record,actions,pdf
 
 def evaluate_random():
 
@@ -108,13 +108,13 @@ def evaluate_random():
     print(f"Average reward per episode: {total_reward / episodes}")
 
 
-q_table,rewards,actions = evaluate_QL(500,20) #500 is number of steps in one eps, 80 is the nids success rate
+q_table,rewards,actions,pdf = evaluate_QL(500,50) #500 is number of steps in one eps, 80 is the nids success rate
 evaluate_random()
 
 #this will give you an action sequence, [0,1,2,3,2,1,...]; 
 # if -1 appears, it means we don't take any action since nids failed
-print('Actions for eps 1:')
-print(actions[0])
+#print('Actions for eps 1:')
+#print(actions[0])
 
 print('Q table:')
 print(q_table)
