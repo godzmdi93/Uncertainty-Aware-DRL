@@ -4,19 +4,20 @@ import numpy as np
 
 #input
 #action_sequence:string of actions peformed
-def shannon(action_sequence):
-    action_sequence_List = list(action_sequence)
-    action_sequence_set = list(set(action_sequence_List)) # list of symbols in the string
-    print(action_sequence_set)
+def shannon(action_sequence,freqList = []):
+    if len(freqList) == 0:
+        action_sequence_List = list(action_sequence)
+        action_sequence_set = list(set(action_sequence_List)) # list of symbols in the string
+        print(action_sequence_set)
 
-    # calculate the frequency of each symbol in the string
-    freqList = []
-    for action in action_sequence_set:
-        count = 0
-        for act in action_sequence_List:
-            if act == action:
-                count += 1
-        freqList.append(float(count) / len(action_sequence_List))
+        # calculate the frequency of each symbol in the string
+        freqList = []
+        for action in action_sequence_set:
+            count = 0
+            for act in action_sequence_List:
+                if act == action:
+                    count += 1
+            freqList.append(float(count) / len(action_sequence_List))
 
     print(freqList)
 
@@ -45,3 +46,4 @@ def Diss(b_list):
         b_diss+=i*up/down
 
     return b_diss
+        
