@@ -1,3 +1,4 @@
+from curses import echo
 from os import stat
 import numpy as np
 from random import randint
@@ -22,7 +23,7 @@ def train(step,nids):
     record = []
     attacks = []
     acts = []
-    for i in range(1, 1000):
+    for i in range(1, 2000): #1000
         state = env.attack_set[env.reset()]
 
         epochs, reward, = 0.8, 0
@@ -33,13 +34,26 @@ def train(step,nids):
         t_a = []
         t_d = []
         total=0
-        if i < 500:
-            epsilon -=1/randint(1000,3000)
+        count = 0
+        for i in t_d:
+            if i == -1:
+                count+=1
+        
+        if len(t_d) == 0:
+            count = 0
         else:
-            epsilon -=0.003
+            count = count/len(t_d)
+
+
+        if random.randrange(0, 100)< nids:
+            if count < 0.5:
+                    epsilon -=1/randint(1000,3000)
+            else:
+                epsilon -=0.003
 
         if epsilon < 0.005:
             epsilon = 0.002
+        
 
         while not done:
             if random.uniform(0, 1) < epsilon:
@@ -70,14 +84,25 @@ def train(step,nids):
             state = next_state
             epochs += 1
             total+=reward
-            total_reward.append(total)
+        #total_reward.append(total)
         acts.append(t_d)
         attacks.append(t_a)
-        record.append(total_reward)
+        record.append(total/epochs)
 
     print('Training Finished')
-    pdf = []
 
+    pdf = cal(acts,attacks)
+
+    dis = np.zeros((4,4))
+
+    for n in range(4):
+        dis[n] = [i/sum(q_table[n]) for i in q_table[n]]
+
+    return dis,record,pdf,acts,attacks
+
+
+def cal(acts,attacks):
+    pdf = []
     s1,s2,s3,s4,s_u = 0,0,0,0,0
     r = []
     for j in range(len(acts)):
@@ -158,13 +183,5 @@ def train(step,nids):
 
     pdf.append(r)
 
-    
-
-    dis = np.zeros((4,4))
-
-    for n in range(4):
-        dis[n] = [i/sum(q_table[n]) for i in q_table[n]]
-
-    return dis,record,pdf
-
+    return pdf
 
