@@ -10,49 +10,51 @@ import json
 import keras
 from keras.models import Sequential, model_from_json
 
-X_train = pickle.load(open("xtrain", "rb"))
-y_train = pickle.load(open("ytrain", "rb"))
-X_test = pickle.load(open("xtest", "rb"))
-y_test = pickle.load(open("ytest", "rb"))
 
-print('X_train shape:', X_train.shape)
-
-
-def dp(X_train, sa, sd, type):  # {dp, ddos}   dp()
+def dp(sa, sd, type):  # {dp, ddos}   dp()
     if type == Actions.Defence1:
-        if sa == 0.8 and sd == 0.2:
-            cnn_accuracy = 0.8
+        if random.random() > (sa - sd):
+        #if sa == 0.8 and sd == 0.2:
+            cnn_accuracy = random.uniform(0.7, 1.0)
+        else:
+            cnn_accuracy = random.uniform(0.5, 0.7)
     else:
-        cnn_accuracy = 0.65
+        cnn_accuracy = 0
 
     return cnn_accuracy
 
 
-def ddos(X_train, sa, sd, type):
+def ddos(sa, sd, type):
     if type == Actions.Defence2:
-        if sa==0.8 and sd==0.2:
-            cnn_accuracy = 0.8
+        if random.random() > (sa - sd):
+        #if sa == 0.8 and sd == 0.2:
+            cnn_accuracy = random.uniform(0.6, 0.8)
+        else:
+            cnn_accuracy = random.uniform(0.5, 0.7)
     else:
-        cnn_accuracy = 0.65
+        cnn_accuracy = 0
 
     return cnn_accuracy
 
-def attack3(X_train, sa, sd, type):
+def attack3(sa, sd, type):
     if type == Actions.Defence3:
-        if sa==0.8 and sd==0.2:
-            cnn_accuracy = 0.8
-
+        if random.random() >sa:
+        #if sa == 0.8 and sd == 0.2:
+            cnn_accuracy = random.uniform(0.6, 1.0)
+        else:
+            cnn_accuracy = random.uniform(0.5, 0.7)
     else:
-        cnn_accuracy = 0.65
-
+        cnn_accuracy = 0
     return cnn_accuracy
 
-def attack4(X_train, sa, sd, type):
+def attack4(sa, sd, type):
     if type == Actions.Defence4:
-        if sa==0.8 and sd==0.2:
-            cnn_accuracy = 0.8
-
+        if random.random() > (sa - sd):
+        #if sa == 0.8 and sd == 0.2:
+            cnn_accuracy = random.uniform(0.3, 0.9)
+        else:
+            cnn_accuracy = random.uniform(0.3, 0.7)
     else:
-        cnn_accuracy = 0.65
+        cnn_accuracy = 0
 
     return cnn_accuracy
