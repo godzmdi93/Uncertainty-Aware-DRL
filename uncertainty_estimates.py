@@ -19,12 +19,12 @@ def shannon(action_sequence,freqList = []):
                     count += 1
             freqList.append(float(count) / len(action_sequence_List))
 
-    print(freqList)
+        print(freqList)
 
     # Shannon entropy
     entropy = 0.0
     for freq in freqList:
-        entropy = entropy + freq * math.log(freq, 4)
+        entropy += freq * math.log(freq, 4)
     entropy = -entropy
     return entropy
 
@@ -43,7 +43,8 @@ def Diss(b_list):
             if i != j:
                 up+=j * Bal(i,j)
                 down+=j
-        b_diss+=i*up/down
+        if down !=0:
+            b_diss+=(i*up)/down
 
-    return b_diss
+    return 1-b_diss
         
