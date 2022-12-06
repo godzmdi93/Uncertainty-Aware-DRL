@@ -1,4 +1,4 @@
-from curses import echo
+# from curses import echo
 from os import stat
 import numpy as np
 from random import randint

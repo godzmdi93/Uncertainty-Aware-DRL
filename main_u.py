@@ -1,6 +1,6 @@
 from cProfile import label
 from re import U
-from termios import B50
+# from termios import B50
 from qlearning import *
 
 from bijective_mapping import *
@@ -53,10 +53,10 @@ B4 = draw_u(3)
 #B, U
 def b_u(B1,B2,B3,B4):
     x = [i for i in range(len(B1))]
-    plt.plot(x,[translateB(i[0],i[0:4]) for i in B1],label = 'Action1')
-    plt.plot(x,[translateB(i[1],i[0:4]) for i in B1],label = 'Action2')
-    plt.plot(x,[translateB(i[2],i[0:4]) for i in B1],label = 'Action3')
-    plt.plot(x,[translateB(i[3],i[0:4])for i in B1],label = 'Action4')
+    plt.plot(x,[translateB(i[0],i[0:4]) for i in B1],label = 'Action_set1')
+    plt.plot(x,[translateB(i[1],i[0:4]) for i in B1],label = 'Action_set2')
+    plt.plot(x,[translateB(i[2],i[0:4]) for i in B1],label = 'Action_set3')
+    plt.plot(x,[translateB(i[3],i[0:4])for i in B1],label = 'Action_set4')
     plt.plot(x,[translateU(i[0:4]) for i in B1],label = 'Uncertainty')
     plt.xlabel('Number of steps')
     plt.ylabel('Belief mass b_X1(x)')
@@ -200,8 +200,8 @@ def entropy(B1,B2,B3,B4):
 
 
 b_u(B1,B2,B3,B4)
-#diss(B1,B2,B3,B4)
-#entropy(B1,B2,B3,B4)
+diss(B1,B2,B3,B4)
+entropy(B1,B2,B3,B4)
 
 
 
