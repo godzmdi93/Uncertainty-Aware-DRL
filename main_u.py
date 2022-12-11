@@ -445,6 +445,5 @@ plt.show()
 #draw_e()
 #draw_d()
 #uncertain()
-#com()
 
 
