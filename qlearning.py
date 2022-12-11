@@ -1,14 +1,17 @@
-# from curses import echo
+from curses import echo
 from os import stat
 import numpy as np
 from random import randint
+
+from pyparsing import actions
 from EnvRL import EnvRL_v0
 import random
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+from u_helper import *
 
 
-def train(step,nids):
+def train(step,nids,type):
 
     attack_set = [randint(0,3) for i in range(step)]
     env = EnvRL_v0(attack_set)
@@ -23,7 +26,7 @@ def train(step,nids):
     record = []
     attacks = []
     acts = []
-    for i in range(1, 2000): #1000
+    for i in range(1, 2000): #2000 / 200
         state = env.attack_set[env.reset()]
 
         epochs, reward, = 0.8, 0
@@ -34,27 +37,58 @@ def train(step,nids):
         t_a = []
         t_d = []
         total=0
-        count = 0
-        for i in t_d:
-            if i == -1:
-                count+=1
+        if type == 0: #vacuity
+            epsilon -=0.0005 #0.0005
+
+            if epsilon < 0.005: #0.005
+                epsilon = 0.005 #0.005
+
+        elif type == 1:  #dissonance
+            epsilon -=0.00025 #0.0005
+
+            if epsilon < 0.35: #0.005
+                epsilon = 0.35 #0.005
+        elif type == 2:  #dissonance
+            epsilon -=0.0003 #0.0005
+
+            if epsilon < 0.3: #0.005
+                epsilon = 0.3 #0.005
+        elif type == 3:  #epsilon-greedy
+            epsilon -=0.00035 #0.0005
+
+            if epsilon < 0.1: #0.005
+                epsilon = 0.1 #0.005
+
+
+
+        # if len(attacks)!=0 and len(acts) !=0:
+        #     a = attacks[0]
+        #     d = acts[0]
+        #     B1 = draw_u(0,a,d) #belief for attack_set1
+        #     B2 = draw_u(1,a,d)
+        #     B3 = draw_u(2,a,d)
+        #     B4 = draw_u(3,a,d)
+        #     H1,H2,H3,H4 = diss(B1,B2,B3,B4)
+        # else:
+        #     H1,H2,H3,H4 = [1],[1],[1],[1]
+
+        # epsilon = epsilon*(1-(H1[-1]+H2[-1]+H3[-1]+H4[-1]))
+
+        # if len(acts)!=0 and len(attacks)!=0:
+        #     d = acts[0]
+        #     a = attacks[0]
+        #     B1 = draw_u(0,a,d) #belief for attack_set1
+        #     B2 = draw_u(1,a,d)
+        #     B3 = draw_u(2,a,d)
+        #     B4 = draw_u(3,a,d)
+        #     u = [translateU(i[0:4]) for i in B1][-1] #0.03
+        #     d1,d2,d3,d4 = diss(B1,B2,B3,B4)
+        #     d = np.average([d1,d2,d3,d4],axis=0)[-1] #0.1
+        #     epsilon = 0.2
+        # else:
+        #     epsilon = 0.8
+
         
-        if len(t_d) == 0:
-            count = 0
-        else:
-            count = count/len(t_d)
-
-
-        if random.randrange(0, 100)< nids:
-            if count < 0.5:
-                    epsilon -=1/randint(1000,3000)
-            else:
-                epsilon -=0.003
-
-        if epsilon < 0.005:
-            epsilon = 0.002
-        
-
         while not done:
             if random.uniform(0, 1) < epsilon:
                 action = env.action_space.sample() # Explore action space
@@ -184,4 +218,3 @@ def cal(acts,attacks):
     pdf.append(r)
 
     return pdf
-
